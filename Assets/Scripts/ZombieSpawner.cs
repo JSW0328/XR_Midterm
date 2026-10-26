@@ -17,13 +17,23 @@ public class ZombieSpawner : MonoBehaviour
     public float intervalDecrease = 0.1f;  // 한 마리 나올 때마다 간격이 이만큼 줄어든다
     public int maxAlive = 15;              // 동시에 있을 수 있는 최대 좀비 수
 
+    [Header("확인용")]
+    public bool showLog = true;            // Console에 생성 기록을 보여 줄지 (다 되면 꺼도 됨)
+
     float timer;
     float currentInterval;
+    int spawnCount;
 
     void Start()
     {
         currentInterval = startInterval;
         timer = startDelay;
+
+        // 설정이 빠졌으면 바로 알려 준다
+        if (zombiePrefab == null) Debug.LogWarning("[ZombieSpawner] Zombie Prefab이 비어 있어요.");
+        if (spawnPoints == null || spawnPoints.Length == 0) Debug.LogWarning("[ZombieSpawner] Spawn Points가 비어 있어요.");
+        if (castleTarget == null) Debug.LogWarning("[ZombieSpawner] Castle Target이 비어 있어요.");
+        if (showLog) Debug.Log("[ZombieSpawner] 시작! " + startDelay + "초 뒤 첫 좀비가 나와요.");
     }
 
     void Update()
@@ -37,8 +47,13 @@ public class ZombieSpawner : MonoBehaviour
         timer = currentInterval;
         currentInterval = Mathf.Max(minInterval, currentInterval - intervalDecrease);
 
-        // 좀비가 너무 많으면 이번에는 건너뛴다
-        if (GameObject.FindGameObjectsWithTag("Enemy").Length >= maxAlive) return;
+        // 살아 있는 좀비 수 (체력 스크립트가 붙은 것만 센다)
+        int alive = FindObjectsOfType<Health>().Length;
+        if (alive >= maxAlive)
+        {
+            if (showLog) Debug.Log("[ZombieSpawner] 좀비가 " + alive + "마리라 이번엔 건너뛰어요.");
+            return;
+        }
 
         Spawn();
     }
@@ -48,17 +63,26 @@ public class ZombieSpawner : MonoBehaviour
         if (zombiePrefab == null || spawnPoints == null || spawnPoints.Length == 0) return;
 
         Transform point = spawnPoints[Random.Range(0, spawnPoints.Length)];
-        if (point == null) return;
+        if (point == null)
+        {
+            Debug.LogWarning("[ZombieSpawner] Spawn Points 중에 빈 칸이 있어요.");
+            return;
+        }
 
         // 생성 위치를 NavMesh(걸을 수 있는 바닥) 위로 맞춘다
         Vector3 pos = point.position;
         NavMeshHit hit;
         if (NavMesh.SamplePosition(pos, out hit, 5f, NavMesh.AllAreas)) pos = hit.position;
+        else Debug.LogWarning("[ZombieSpawner] " + point.name + " 근처에 NavMesh(파란 바닥)가 없어요.");
 
         GameObject zombie = Instantiate(zombiePrefab, pos, point.rotation);
+        spawnCount++;
+        zombie.name = "Zombie_" + spawnCount;
 
         // Standard Assets의 AI 조종 스크립트에 목표(성문)를 알려 준다
         AICharacterControl ai = zombie.GetComponent<AICharacterControl>();
         if (ai != null) ai.SetTarget(castleTarget);
+
+        if (showLog) Debug.Log("[ZombieSpawner] " + zombie.name + " 생성 (" + point.name + ")");
     }
 }

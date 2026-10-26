@@ -18,6 +18,7 @@ public class GameManager : MonoBehaviour
     public Text castleText;          // 성 체력 표시
     public Text weaponText;          // 현재 무기 표시
     public Text messageText;         // 안내 문구 (소환 안내 등)
+    public Text playerHpText;        // 플레이어 체력 표시
     public GameObject gameOverPanel; // 게임 오버 때 보여 줄 패널 (처음엔 꺼 둔다)
 
     public int Gold { get; private set; }
@@ -61,6 +62,18 @@ public class GameManager : MonoBehaviour
         Gold -= amount;
         RefreshUI();
         return true;
+    }
+
+    // 골드를 잃는다 (플레이어가 쓰러졌을 때). 0 아래로는 내려가지 않음
+    public void LoseGold(int amount)
+    {
+        Gold = Mathf.Max(0, Gold - amount);
+        RefreshUI();
+    }
+
+    public void SetPlayerHpText(string text)
+    {
+        if (playerHpText != null) playerHpText.text = text;
     }
 
     // 성 체력을 깎는다 (좀비가 성문에 도착했을 때)
