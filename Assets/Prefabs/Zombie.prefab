@@ -2391,6 +2391,13 @@ MonoBehaviour:
   goldReward: 10
   deathEffect: {fileID: 100000, guid: 32aafb358d61bd14b9b27ed0871fe43b, type: 3}
   deathSound: {fileID: 0}
+  drops:
+  - itemPrefab: {fileID: 6092491132233723646, guid: 514d407d4900c5c49b5a8dc9f98215d4, type: 3}
+    chance: 0.08
+  - itemPrefab: {fileID: 8433592531791636104, guid: f2f20de6ee6d3ff4cb99734dfd847d2f, type: 3}
+    chance: 0.06
+  - itemPrefab: {fileID: 4297195067434029671, guid: 7a83ce8f8d2dad147926314b3e19d1e2, type: 3}
+    chance: 1
 --- !u!1 &900909259899255340
 GameObject:
   m_ObjectHideFlags: 0

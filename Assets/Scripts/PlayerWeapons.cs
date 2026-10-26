@@ -14,8 +14,8 @@ public class PlayerWeapons : MonoBehaviour
     public Transform attackPoint;           // 화살, 폭탄이 나가는 위치 (비우면 가슴 앞에서 자동)
     public bool aimWithCamera = true;       // true: 화면 가운데를 조준 / false: 캐릭터가 보는 방향
     public float aimDistance = 100f;        // 조준점이 아무것도 안 맞을 때 쓰는 거리
-    public bool bowUnlocked = true;         // false면 2번 무기 사용 불가 (아이템으로 해금할 때 사용)
-    public bool bombUnlocked = true;        // false면 3번 무기 사용 불가
+    public bool bowUnlocked = false;        // false면 2번 무기 사용 불가 (활 아이템을 주우면 true)
+    public bool bombUnlocked = false;       // false면 3번 무기 사용 불가 (폭탄 아이템을 주우면 true)
 
     [Header("1. 검 (근접)")]
     public int swordDamage = 1;
@@ -23,6 +23,9 @@ public class PlayerWeapons : MonoBehaviour
     public float swordCooldown = 0.5f;      // 다음 공격까지 기다리는 시간
     public GameObject swordEffect;          // 휘두를 때 파티클 (비워 둬도 됨)
     public AudioClip swordSound;
+    public Transform swordModel;            // 손에 든 검 모델 (검을 고를 때만 보이고, 공격하면 휘두름)
+    public float swingAngle = 100f;         // 휘두르는 각도
+    public float swingTime = 0.25f;         // 휘두르는 데 걸리는 시간 (초)
 
     [Header("2. 활 (원거리)")]
     public Projectile arrowPrefab;          // 화살 프리팹 (Projectile 붙은 것)
@@ -40,9 +43,37 @@ public class PlayerWeapons : MonoBehaviour
     WeaponType current = WeaponType.Sword;
     float nextAttackTime;
 
+    Quaternion swordRestRotation;   // 검의 평소 각도
+    float swingTimer;               // 휘두르는 중이면 0보다 큼
+
     void Start()
     {
+        if (swordModel != null) swordRestRotation = swordModel.localRotation;
+        RefreshSwordVisible();
         UpdateWeaponText();
+    }
+
+    void LateUpdate()
+    {
+        // 애니메이션이 손 위치를 정한 뒤에 검을 휘두르는 각도를 더한다
+        if (swordModel == null) return;
+
+        if (swingTimer > 0f)
+        {
+            swingTimer -= Time.deltaTime;
+            float t = 1f - Mathf.Clamp01(swingTimer / swingTime);   // 0 → 1
+            float angle = Mathf.Sin(t * Mathf.PI) * swingAngle;     // 내려쳤다가 다시 돌아옴
+            swordModel.localRotation = swordRestRotation * Quaternion.Euler(angle, 0f, 0f);
+        }
+        else
+        {
+            swordModel.localRotation = swordRestRotation;
+        }
+    }
+
+    void RefreshSwordVisible()
+    {
+        if (swordModel != null) swordModel.gameObject.SetActive(current == WeaponType.Sword);
     }
 
     void Update()
@@ -64,6 +95,7 @@ public class PlayerWeapons : MonoBehaviour
     void Select(WeaponType type)
     {
         current = type;
+        RefreshSwordVisible();
     }
 
     // 아이템을 주웠을 때 다른 스크립트가 불러서 무기를 해금한다
@@ -142,6 +174,8 @@ public class PlayerWeapons : MonoBehaviour
 
     void SwordAttack()
     {
+        swingTimer = swingTime;   // 검 휘두르기 시작
+
         // 캐릭터 앞쪽에 보이지 않는 구를 만들고, 그 안의 좀비에게 피해를 준다
         Vector3 center = transform.position + Vector3.up * 1f + transform.forward * (swordRange * 0.6f);
         Collider[] hits = Physics.OverlapSphere(center, swordRange);

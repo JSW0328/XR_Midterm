@@ -92,7 +92,24 @@ public class GameManager : MonoBehaviour
 
     public void SetMessage(string text)
     {
+        messageTimer = 0f;
         if (messageText != null) messageText.text = text;
+    }
+
+    // 몇 초 동안만 보여 주고 사라지는 안내 문구 (아이템 획득 등)
+    public void ShowMessage(string text, float seconds)
+    {
+        if (messageText != null) messageText.text = text;
+        messageTimer = seconds;
+    }
+
+    float messageTimer;
+
+    void LateUpdate()
+    {
+        if (messageTimer <= 0f) return;
+        messageTimer -= Time.unscaledDeltaTime;
+        if (messageTimer <= 0f && messageText != null) messageText.text = "";
     }
 
     void GameOver()
