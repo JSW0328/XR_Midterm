@@ -8,7 +8,7 @@ public class SummonPad : MonoBehaviour
 {
     public GameObject allyPrefab;       // 소환할 아군 프리팹
     public Transform spawnPoint;        // 아군이 나타날 위치 (비우면 발판 위)
-    public int cost = 50;               // 소환 비용 (골드)
+    public int cost = 60;               // 소환 비용 (골드)
     public KeyCode summonKey = KeyCode.E;
     public int maxAllies = 1;           // 이 발판에서 소환할 수 있는 최대 수
     public AudioClip summonSound;       // 소환 소리 (비워 둬도 됨)
@@ -30,12 +30,12 @@ public class SummonPad : MonoBehaviour
 
         if (count >= maxAllies)
         {
-            GameManager.Instance.SetMessage("이 자리는 이미 가득 찼어요");
+            GameManager.Instance.ShowMessage("이 자리는 이미 가득 찼어요", 2f);
             return;
         }
         if (!GameManager.Instance.TrySpendGold(cost))
         {
-            GameManager.Instance.SetMessage("골드가 부족해요 (필요: " + cost + ")");
+            GameManager.Instance.ShowMessage("골드가 부족해요 (필요: " + cost + ")", 2f);
             return;
         }
 
@@ -56,7 +56,7 @@ public class SummonPad : MonoBehaviour
         }
         if (summonSound != null) AudioSource.PlayClipAtPoint(summonSound, pos);
 
-        GameManager.Instance.SetMessage("아군 소환 완료!");
+        GameManager.Instance.ShowMessage("아군 소환 완료!", 2f);
     }
 
     void OnTriggerEnter(Collider other)

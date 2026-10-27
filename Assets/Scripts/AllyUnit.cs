@@ -47,14 +47,14 @@ public class AllyUnit : MonoBehaviour
         if (shootSound != null) AudioSource.PlayClipAtPoint(shootSound, origin);
     }
 
-    // 범위 안에서 가장 가까운 Enemy 태그 오브젝트를 찾는다
+    // 범위 안에서 가장 가까운 좀비(체력 스크립트가 붙은 것)를 찾는다
     Transform FindNearestEnemy()
     {
-        GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
+        Health[] enemies = FindObjectsOfType<Health>();
         Transform nearest = null;
         float best = range * range;
 
-        foreach (GameObject e in enemies)
+        foreach (Health e in enemies)
         {
             float d = (e.transform.position - transform.position).sqrMagnitude;
             if (d <= best)
