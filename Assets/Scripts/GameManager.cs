@@ -115,6 +115,7 @@ public class GameManager : MonoBehaviour
     void GameOver()
     {
         IsGameOver = true;
+        SetMessage("");   // 안내 문구 지우기
         if (gameOverPanel != null) gameOverPanel.SetActive(true);
         Time.timeScale = 0f;   // 게임을 멈춘다
     }

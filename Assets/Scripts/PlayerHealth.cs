@@ -42,6 +42,7 @@ public class PlayerHealth : MonoBehaviour
     void Update()
     {
         if (!IsDead) return;
+        if (GameManager.Instance != null && GameManager.Instance.IsGameOver) return;   // 게임 오버면 멈춤
 
         // 쓰러져 있는 동안은 제자리에 멈춰 있게 한다
         if (character != null) character.Move(Vector3.zero, false, false);
