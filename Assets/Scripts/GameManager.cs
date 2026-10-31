@@ -13,6 +13,10 @@ public class GameManager : MonoBehaviour
     public int startGold = 0;        // 처음 가진 골드
     public int castleMaxHp = 20;     // 성 최대 체력
 
+    [Header("승리 조건")]
+    public float surviveSeconds = 180f;  // 이 시간(초) 동안 성을 지키면 승리 (기본 3분)
+    public string missionText = "3분 동안 성을 지켜라!";  // 시작할 때 보여 줄 미션 문구
+
     [Header("UI 연결 (Canvas 안의 Text를 끌어다 놓기)")]
     public Text goldText;            // 골드 표시
     public Text castleText;          // 성 체력 표시
@@ -20,10 +24,15 @@ public class GameManager : MonoBehaviour
     public Text messageText;         // 안내 문구 (소환 안내 등)
     public Text playerHpText;        // 플레이어 체력 표시
     public GameObject gameOverPanel; // 게임 오버 때 보여 줄 패널 (처음엔 꺼 둔다)
+    public Text timerText;           // 남은 시간 표시
+    public GameObject victoryPanel;  // 승리 때 보여 줄 패널 (처음엔 꺼 둔다)
 
     public int Gold { get; private set; }
     public int CastleHp { get; private set; }
-    public bool IsGameOver { get; private set; }
+    public bool IsGameOver { get; private set; }   // 게임이 끝났는지 (패배 또는 승리)
+    public bool IsVictory { get; private set; }    // 승리로 끝났는지
+
+    float timeLeft;   // 남은 시간 (초)
 
     void Awake()
     {
@@ -32,15 +41,37 @@ public class GameManager : MonoBehaviour
         Gold = startGold;
         CastleHp = castleMaxHp;
         IsGameOver = false;
+        IsVictory = false;
+        timeLeft = surviveSeconds;
 
         if (gameOverPanel != null) gameOverPanel.SetActive(false);
+        if (victoryPanel != null) victoryPanel.SetActive(false);
         SetMessage("");
         RefreshUI();
+        RefreshTimer();
+    }
+
+    void Start()
+    {
+        // 시작하자마자 미션 문구를 3초 동안 보여 준다
+        if (!string.IsNullOrEmpty(missionText)) ShowMessage(missionText, 5f);
     }
 
     void Update()
     {
-        // 게임 오버 상태에서 R 키를 누르면 처음부터 다시
+        // 게임 중이면 남은 시간을 줄이고, 0이 되면 승리
+        if (!IsGameOver)
+        {
+            timeLeft -= Time.deltaTime;
+            if (timeLeft <= 0f)
+            {
+                timeLeft = 0f;
+                Victory();
+            }
+            RefreshTimer();
+        }
+
+        // 게임이 끝난 상태(패배·승리)에서 R 키를 누르면 처음부터 다시
         // (File > Build Settings 에서 이 씬을 Add Open Scenes 로 추가해 둬야 한다)
         if (IsGameOver && Input.GetKeyDown(KeyCode.R))
         {
@@ -118,6 +149,24 @@ public class GameManager : MonoBehaviour
         SetMessage("");   // 안내 문구 지우기
         if (gameOverPanel != null) gameOverPanel.SetActive(true);
         Time.timeScale = 0f;   // 게임을 멈춘다
+    }
+
+    // 남은 시간을 지키면 승리: 승리 화면을 보여 주고 게임을 멈춘다
+    void Victory()
+    {
+        IsGameOver = true;   // 다른 스크립트(좀비, 무기 등)가 멈추도록 같은 표시를 쓴다
+        IsVictory = true;
+        SetMessage("");
+        if (victoryPanel != null) victoryPanel.SetActive(true);
+        Time.timeScale = 0f;
+    }
+
+    // 남은 시간을 "남은 시간 2:31" 형태로 보여 준다
+    void RefreshTimer()
+    {
+        if (timerText == null) return;
+        int sec = Mathf.CeilToInt(timeLeft);
+        timerText.text = "남은 시간 " + (sec / 60) + ":" + (sec % 60).ToString("00");
     }
 
     void RefreshUI()
