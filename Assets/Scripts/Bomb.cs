@@ -12,6 +12,9 @@ public class Bomb : MonoBehaviour
     public float explosionForce = 600f;  // 주변 물체를 날려 보내는 힘
     public GameObject explosionEffect;   // 폭발 파티클 (Standard Assets의 Explosion 추천)
     public AudioClip explosionSound;     // 폭발 소리 (3D로 재생됨)
+    [Range(0f, 1f)] public float soundVolume = 1f;  // 폭발 소리 크기
+    public float soundMinDistance = 10f; // 이 거리 안에서는 최대 크기로 들림 (클수록 멀리서도 크게)
+    public float soundMaxDistance = 60f; // 이 거리 밖에서는 안 들림
 
     bool exploded;
 
@@ -66,8 +69,24 @@ public class Bomb : MonoBehaviour
             GameObject fx = Instantiate(explosionEffect, transform.position, Quaternion.identity);
             Destroy(fx, 4f);
         }
-        if (explosionSound != null) AudioSource.PlayClipAtPoint(explosionSound, transform.position);
+        if (explosionSound != null) PlaySound();
 
         Destroy(gameObject);
+    }
+
+    // 폭발 위치에 3D 소리를 낸다. 가까울수록 크게, 멀수록 작게 들린다
+    void PlaySound()
+    {
+        GameObject go = new GameObject("ExplosionSound");
+        go.transform.position = transform.position;
+        AudioSource src = go.AddComponent<AudioSource>();
+        src.clip = explosionSound;
+        src.volume = soundVolume;
+        src.spatialBlend = 1f;                          // 3D 소리
+        src.rolloffMode = AudioRolloffMode.Linear;      // 거리에 따라 일정하게 작아짐
+        src.minDistance = soundMinDistance;
+        src.maxDistance = soundMaxDistance;
+        src.Play();
+        Destroy(go, explosionSound.length + 0.1f);      // 소리가 끝나면 지운다
     }
 }

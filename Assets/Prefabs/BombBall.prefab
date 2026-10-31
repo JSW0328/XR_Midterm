@@ -124,7 +124,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 4882889165965022704}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ad0d454b5768c444aa049d7e6b086705, type: 3}
+  m_Script: {fileID: 11500000, guid: d8101e03a2286de4d9e79d70211ef663, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   fuseTime: 1.5
@@ -132,4 +132,7 @@ MonoBehaviour:
   damage: 3
   explosionForce: 600
   explosionEffect: {fileID: 100010, guid: 031d08f52af1daa4f929b85221519426, type: 3}
-  explosionSound: {fileID: 0}
+  explosionSound: {fileID: 8300000, guid: f437448d4ddb90b43a035ef142c7e65f, type: 3}
+  soundVolume: 1
+  soundMinDistance: 10
+  soundMaxDistance: 60
