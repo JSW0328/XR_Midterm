@@ -54,7 +54,7 @@ public class GameManager : MonoBehaviour
     void Start()
     {
         // 시작하자마자 미션 문구를 5초 동안 보여 준다
-        if (!string.IsNullOrEmpty(missionText)) ShowMessage(missionText, 5f);
+        if (!string.IsNullOrEmpty(missionText)) ShowMessage(missionText, 8f);
     }
 
     void Update()
