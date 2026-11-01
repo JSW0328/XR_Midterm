@@ -53,7 +53,7 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
-        // 시작하자마자 미션 문구를 3초 동안 보여 준다
+        // 시작하자마자 미션 문구를 5초 동안 보여 준다
         if (!string.IsNullOrEmpty(missionText)) ShowMessage(missionText, 5f);
     }
 
@@ -72,10 +72,22 @@ public class GameManager : MonoBehaviour
         }
 
         // 게임이 끝난 상태(패배·승리)에서 R 키를 누르면 처음부터 다시
-        // (File > Build Settings 에서 이 씬을 Add Open Scenes 로 추가해 둬야 한다)
         if (IsGameOver && Input.GetKeyDown(KeyCode.R))
         {
-            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+            Scene scene = SceneManager.GetActiveScene();
+            if (scene.buildIndex >= 0)
+            {
+                // Build Settings 에 씬이 등록되어 있으면 그대로 다시 불러온다
+                SceneManager.LoadScene(scene.buildIndex);
+            }
+#if UNITY_EDITOR
+            else
+            {
+                // 패키지를 새 프로젝트에 열어서 Build Settings 에 씬이 없을 때도 재시작되게 한다 (에디터 전용)
+                UnityEditor.SceneManagement.EditorSceneManager.LoadSceneInPlayMode(
+                    scene.path, new LoadSceneParameters(LoadSceneMode.Single));
+            }
+#endif
         }
     }
 

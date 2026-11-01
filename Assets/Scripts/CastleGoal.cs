@@ -19,7 +19,9 @@ public class CastleGoal : MonoBehaviour
     {
         // 부딪힌 콜라이더의 주인(리지드바디가 붙은 최상위 오브젝트)을 찾는다
         GameObject root = other.attachedRigidbody != null ? other.attachedRigidbody.gameObject : other.gameObject;
-        if (!root.CompareTag("Enemy")) return;
+        // 좀비인지 확인: 좀비에게만 붙어 있는 Health 스크립트로 구분한다
+        // (태그 "Enemy"로 확인하면 새 프로젝트에 패키지를 열었을 때 태그가 없어서 오류가 난다)
+        if (root.GetComponentInChildren<Health>() == null) return;
 
         if (GameManager.Instance != null) GameManager.Instance.DamageCastle(damagePerZombie);
         if (hitSound != null) AudioSource.PlayClipAtPoint(hitSound, transform.position);
